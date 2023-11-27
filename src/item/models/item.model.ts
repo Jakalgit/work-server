@@ -8,12 +8,14 @@ import {
   Model,
   Table
 } from "sequelize-typescript";
-import {Tag} from "../tag/tag.model";
-import {ItemTag} from "../intermediate-tables/item-tag.model";
-import {Color} from "../color/color.model";
-import {Image} from "../image/image.model";
-import {BasketItem} from "../basket-item/basket-item.model";
+import {Tag} from "../../tag/tag.model";
+import {ItemTag} from "../../intermediate-tables/item-tag.model";
+import {Color} from "../../color/color.model";
+import {Image} from "../../image/image.model";
+import {BasketItem} from "../../basket-item/basket-item.model";
 import {Discount} from "./discount.model";
+import {Popular} from "./popular.model";
+import {Novelty} from "./novelty.model";
 
 interface ItemCreationAttrs {
   name: string;
@@ -79,4 +81,10 @@ export class Item extends Model<Item, ItemCreationAttrs> {
 
   @HasOne(() => Discount)
   discount: Discount
+
+  @HasOne(() => Popular)
+  popular: Discount
+
+  @HasOne(() => Novelty)
+  novelty: Discount
 }
