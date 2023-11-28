@@ -1,12 +1,12 @@
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {InjectModel} from "@nestjs/sequelize";
-import {Order} from "./order.model";
+import {Order} from "./models/order.model";
 import {CreateOrderDto} from "./dto/create-order.dto";
 import {Item} from "../item/models/item.model";
 import {Op} from "sequelize";
 import {BasketItem} from "../basket-item/basket-item.model";
 import {ItemService} from "../item/item.service";
-import {OrderItem} from "../order-item/order-item.model";
+import {OrderItem} from "./models/order-item.model";
 
 @Injectable()
 export class OrderService {
@@ -76,26 +76,33 @@ export class OrderService {
   }
 
   async getAll() {
-
+    return await this.orderRepository.findAll()
   }
 
-  async getOneById() {
-
+  async getOneById(id: number) {
+    return await this.getOrderWithItems({where: {id}})
   }
 
-  async getOneByToken() {
-
+  async getOneByToken(token: string) {
+    return await this.getOrderWithItems({where: {token}})
   }
 
-  async getOneByNumber() {
-
+  async getOrdersByPhone(phone: string) {
+    return await this.orderRepository.findAll({where: {phone}})
   }
 
-  async delete() {
-
+  async delete(id: number) {
+    await this.orderItemRepository.destroy({where: {orderId: id}})
+    await this.orderRepository.destroy({where: {id}})
   }
 
   async createPayment() {
 
+  }
+
+  private async getOrderWithItems(options: any) {
+    const order = await this.orderRepository.findOne(options)
+    const orderItems = await this.orderItemRepository.findAll({where: {orderId: order.id}})
+    return {...order, items: orderItems}
   }
 }

@@ -8,13 +8,43 @@ import { BasketItemModule } from './basket-item/basket-item.module';
 import { RepairRequestModule } from './repair-request/repair-request.module';
 import { DialogModule } from './dialog/dialog.module';
 import { OrderModule } from './order/order.module';
-import { OrderItemModule } from './order-item/order-item.module';
 import { FilesModule } from './files/files.module';
+import {ConfigModule} from "@nestjs/config";
+import {ServeStaticModule} from "@nestjs/serve-static";
+import * as path from "path"
+import {SequelizeModule} from "@nestjs/sequelize";
+import pg from "pg";
 
 @Module({
-  imports: [UserModule, ItemModule, TagModule, ColorModule, ImageModule, BasketItemModule, RepairRequestModule, DialogModule, OrderModule, OrderItemModule, FilesModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: `.env`
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: path.resolve(__dirname, 'static')
+    }),
+    SequelizeModule.forRoot({
+      dialect: 'postgres',
+      dialectModule: pg,
+      host: process.env.POSTGRES_HOST,
+      port: Number(process.env.POSTGRES_PORT),
+      username: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DB,
+      models: [],
+      autoLoadModels: true,
+    }),
+    UserModule,
+    ItemModule,
+    TagModule,
+    ColorModule,
+    ImageModule,
+    BasketItemModule,
+    RepairRequestModule,
+    DialogModule,
+    OrderModule,
+    FilesModule
+  ],
 })
 export class AppModule {
 }

@@ -1,9 +1,8 @@
 import {Column, DataType, HasMany, Model, Table} from "sequelize-typescript";
-import {OrderItem} from "../order-item/order-item.model";
+import {OrderItem} from "./order-item.model";
 
 interface OrderCreationAttrs {
   token: string;
-  number: string;
   name: string;
   phone: number;
   email: string;
@@ -19,9 +18,6 @@ export class Order extends Model<Order, OrderCreationAttrs> {
 
   @Column({type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true})
   id: number;
-
-  @Column({type: DataType.STRING, allowNull: false})
-  number: string;
 
   @Column({type: DataType.STRING, unique: true, allowNull: false})
   token: string;

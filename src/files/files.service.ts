@@ -3,7 +3,7 @@ import * as path from "path"
 import * as fs from "fs"
 import * as uuid from "uuid"
 import {InjectModel} from "@nestjs/sequelize";
-import {OrderItem} from "../order-item/order-item.model";
+import {OrderItem} from "../order/models/order-item.model";
 
 @Injectable()
 export class FilesService {

@@ -1,6 +1,6 @@
 import {BelongsTo, Column, DataType, ForeignKey, Model, Table} from "sequelize-typescript";
-import {Order} from "../order/order.model";
-import {Image} from "../image/image.model";
+import {Order} from "./order.model";
+import {Image} from "../../image/image.model";
 
 interface OrderItemCreationAttrs {
   name: string;
