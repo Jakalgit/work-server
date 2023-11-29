@@ -17,7 +17,7 @@ export class ColorService {
     const color = await this.colorRepository.findOne({where: {name: dto.name}})
 
     if (color) {
-      throw HttpException('Группа цветов с таким названием уже существует', HttpStatus.BAD_REQUEST)
+      throw new HttpException('Группа цветов с таким названием уже существует', HttpStatus.BAD_REQUEST)
     }
 
     return await this.colorRepository.create(dto)

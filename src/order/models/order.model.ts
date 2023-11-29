@@ -4,7 +4,7 @@ import {OrderItem} from "./order-item.model";
 interface OrderCreationAttrs {
   token: string;
   name: string;
-  phone: number;
+  phone: string;
   email: string;
   address: string;
   date: number;

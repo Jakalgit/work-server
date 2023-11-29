@@ -20,7 +20,7 @@ export class OrderService {
   }
 
   async create(dto: CreateOrderDto) {
-    let fullPrice = 0
+    let fullPrice: number = 0
     const basketItemIds = JSON.parse(dto.basketItemIds)
     const itemIds = []
     basketItemIds.forEach(el => itemIds.push(el.itemId))
@@ -42,14 +42,12 @@ export class OrderService {
       const basketItem = basketItems.find(el => el.itemId === item.id)
       fullPrice += item.price * basketItem.count
     })
-    const number = Date.now().toString().split('').reverse().join('')
+
     const order = await this.orderRepository.create({
       token: dto.token,
       name: dto.name,
       email: dto.email,
-      number,
       phone: dto.phone,
-      email: dto.email,
       address: dto.address,
       date: Date.now(),
       price: fullPrice,

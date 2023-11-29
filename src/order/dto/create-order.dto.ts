@@ -12,7 +12,7 @@ export class CreateOrderDto {
   @Length(2)
   name: string;
 
-  @IsString("phone должно иметь тип string")
+  @IsString({message: "phone должно иметь тип string"})
   @IsPhoneNumber("RU", {message: "Неверный формат номера телефона"})
   phone: string;
 
@@ -25,10 +25,10 @@ export class CreateOrderDto {
   // @IsNumber("track должно иметь тип number")
   // track: number;
 
-  @IsNumber("typePay должно иметь тип number")
+  @IsNumber({}, {message: "typePay должно иметь тип number"})
   typePay: number;
 
-  @IsNumber("typeDelivery должно иметь тип number")
+  @IsNumber({}, {message: "typeDelivery должно иметь тип number"})
   typeDelivery: number;
 
 }

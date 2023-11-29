@@ -148,7 +148,7 @@ export class ItemService {
   }
 
   async getOne(id: number) {
-    const item = await this.itemRepository.findOne({where: {id, visibility: true}})
+    const item = await this.itemRepository.findOne({rejectOnEmpty: undefined, where: {id, visibility: true}})
 
     if (!item) {
       throw new HttpException('Товара с таким id не существует', HttpStatus.NOT_FOUND)
@@ -236,7 +236,7 @@ export class ItemService {
   }
 
   async addDiscount(id: number, price: number) {
-    const item = await this.itemRepository.findOne({where: {id}})
+    const item = await this.itemRepository.findOne({rejectOnEmpty: undefined, where: {id}})
 
     if (!item) {
       throw new HttpException('Товара с таким id не существует', HttpStatus.NOT_FOUND)
@@ -246,7 +246,7 @@ export class ItemService {
       throw new HttpException('Скидочная цена должна быть меньше основной', HttpStatus.BAD_REQUEST)
     }
 
-    let discount = await this.discountRepository.findOne({where: {itemId: id}})
+    let discount = await this.discountRepository.findOne({rejectOnEmpty: undefined, where: {itemId: id}})
 
     if (discount) {
       throw new HttpException('Скидка для этого товара уже существует', HttpStatus.BAD_REQUEST)
@@ -261,7 +261,7 @@ export class ItemService {
   }
 
   async deleteDiscount(id: number) {
-    const discount = await this.discountRepository.findOne({where: {itemId: id}})
+    const discount = await this.discountRepository.findOne({rejectOnEmpty: undefined, where: {itemId: id}})
 
     if (!discount) {
       throw new HttpException('Скидка для этого товара не найдена', HttpStatus.NOT_FOUND)
@@ -273,7 +273,7 @@ export class ItemService {
   }
 
   async addToNovelty(id: number) {
-    const item = await this.itemRepository.findOne({where: {id}})
+    const item = await this.itemRepository.findOne({rejectOnEmpty: undefined, where: {id}})
 
     if (!item) {
       throw new HttpException('Товара с таким id не существует', HttpStatus.NOT_FOUND)
@@ -283,7 +283,7 @@ export class ItemService {
   }
 
   async deleteFromNovelty(id: number) {
-    const item = await this.itemRepository.findOne({where: {id}})
+    const item = await this.itemRepository.findOne({rejectOnEmpty: undefined, where: {id}})
 
     if (!item) {
       throw new HttpException('Товара с таким id не существует', HttpStatus.NOT_FOUND)
@@ -293,7 +293,7 @@ export class ItemService {
   }
 
   async addToPopular(id: number) {
-    const item = await this.itemRepository.findOne({where: {id}})
+    const item = await this.itemRepository.findOne({rejectOnEmpty: undefined, where: {id}})
 
     if (!item) {
       throw new HttpException('Товара с таким id не существует', HttpStatus.NOT_FOUND)
@@ -303,7 +303,7 @@ export class ItemService {
   }
 
   async deleteFromPopular(id: number) {
-    const item = await this.itemRepository.findOne({where: {id}})
+    const item = await this.itemRepository.findOne({rejectOnEmpty: undefined, where: {id}})
 
     if (!item) {
       throw new HttpException('Товара с таким id не существует', HttpStatus.NOT_FOUND)
