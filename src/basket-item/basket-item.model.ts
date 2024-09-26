@@ -1,6 +1,13 @@
-import {BelongsTo, Column, DataType, ForeignKey, Model, Table} from "sequelize-typescript";
-import {Item} from "../item/models/item.model";
-import {User} from "../user/user.model";
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  Model,
+  Table,
+} from 'sequelize-typescript';
+import { Item } from '../item/models/item.model';
+import { User } from '../user/user.model';
 
 interface BasketItemCreationAttrs {
   itemId: number;
@@ -8,13 +15,17 @@ interface BasketItemCreationAttrs {
   userId: number;
 }
 
-@Table({tableName: 'basket-item'})
+@Table({ tableName: 'basket-item' })
 export class BasketItem extends Model<BasketItem, BasketItemCreationAttrs> {
+  @Column({
+    type: DataType.INTEGER,
+    unique: true,
+    autoIncrement: true,
+    primaryKey: true,
+  })
+  id: number = 0;
 
-  @Column({type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true})
-  id: number;
-
-  @Column({type: DataType.INTEGER, allowNull: false})
+  @Column({ type: DataType.INTEGER, allowNull: false })
   count: number;
 
   @BelongsTo(() => Item)
@@ -30,5 +41,4 @@ export class BasketItem extends Model<BasketItem, BasketItemCreationAttrs> {
   @ForeignKey(() => User)
   @Column
   userId: number;
-
 }

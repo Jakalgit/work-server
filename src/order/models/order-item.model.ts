@@ -1,6 +1,13 @@
-import {BelongsTo, Column, DataType, ForeignKey, Model, Table} from "sequelize-typescript";
-import {Order} from "./order.model";
-import {Image} from "../../image/image.model";
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  Model,
+  Table,
+} from 'sequelize-typescript';
+import { Order } from './order.model';
+import { Image } from '../../image/image.model';
 
 interface OrderItemCreationAttrs {
   name: string;
@@ -11,25 +18,29 @@ interface OrderItemCreationAttrs {
   orderId: number;
 }
 
-@Table({tableName: 'order-item'})
+@Table({ tableName: 'order-item' })
 export class OrderItem extends Model<OrderItem, OrderItemCreationAttrs> {
+  @Column({
+    type: DataType.INTEGER,
+    unique: true,
+    autoIncrement: true,
+    primaryKey: true,
+  })
+  id: number = 0;
 
-  @Column({type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true})
-  id: number;
-
-  @Column({type: DataType.STRING, allowNull: false})
+  @Column({ type: DataType.STRING, allowNull: false })
   name: string;
 
-  @Column({type: DataType.INTEGER, allowNull: false})
+  @Column({ type: DataType.INTEGER, allowNull: false })
   price: number;
 
-  @Column({type: DataType.STRING, allowNull: false})
+  @Column({ type: DataType.STRING, allowNull: false })
   image: string;
 
-  @Column({type: DataType.INTEGER, allowNull: false})
+  @Column({ type: DataType.INTEGER, allowNull: false })
   count: number;
 
-  @Column({type: DataType.STRING, allowNull: false})
+  @Column({ type: DataType.STRING, allowNull: false })
   article: string;
 
   @BelongsTo(() => Order)
@@ -37,5 +48,4 @@ export class OrderItem extends Model<OrderItem, OrderItemCreationAttrs> {
 
   @ForeignKey(() => Order)
   orderId: number;
-
 }

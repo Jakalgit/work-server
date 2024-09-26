@@ -1,4 +1,4 @@
-import {Column, DataType, Model, Table} from "sequelize-typescript";
+import { Column, DataType, Model, Table } from 'sequelize-typescript';
 
 interface RepairRequestCreationAttrs {
   name: string;
@@ -7,22 +7,28 @@ interface RepairRequestCreationAttrs {
   response: boolean;
 }
 
-@Table({tableName: 'repair-request'})
-export class RepairRequest extends Model<RepairRequest, RepairRequestCreationAttrs> {
+@Table({ tableName: 'repair-request' })
+export class RepairRequest extends Model<
+  RepairRequest,
+  RepairRequestCreationAttrs
+> {
+  @Column({
+    type: DataType.INTEGER,
+    unique: true,
+    autoIncrement: true,
+    primaryKey: true,
+  })
+  id: number = 0;
 
-  @Column({type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true})
-  id: number;
-
-  @Column({type: DataType.STRING, allowNull: false})
+  @Column({ type: DataType.STRING, allowNull: false })
   name: string;
 
-  @Column({type: DataType.NUMBER, allowNull: false})
+  @Column({ type: DataType.NUMBER, allowNull: false })
   phone: number;
 
-  @Column({type: DataType.STRING, allowNull: false})
+  @Column({ type: DataType.STRING, allowNull: false })
   message: string;
 
-  @Column({type: DataType.BOOLEAN, allowNull: false})
+  @Column({ type: DataType.BOOLEAN, allowNull: false })
   response: boolean;
-
 }

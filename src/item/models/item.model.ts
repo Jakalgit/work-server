@@ -4,18 +4,19 @@ import {
   Column,
   DataType,
   ForeignKey,
-  HasMany, HasOne,
+  HasMany,
+  HasOne,
   Model,
-  Table
-} from "sequelize-typescript";
-import {Tag} from "../../tag/tag.model";
-import {ItemTag} from "../../intermediate-tables/item-tag.model";
-import {Color} from "../../color/color.model";
-import {Image} from "../../image/image.model";
-import {BasketItem} from "../../basket-item/basket-item.model";
-import {Discount} from "./discount.model";
-import {Popular} from "./popular.model";
-import {Novelty} from "./novelty.model";
+  Table,
+} from 'sequelize-typescript';
+import { Tag } from '../../tag/tag.model';
+import { ItemTag } from '../../intermediate-tables/item-tag.model';
+import { Color } from '../../color/color.model';
+import { Image } from '../../image/image.model';
+import { BasketItem } from '../../basket-item/basket-item.model';
+import { Discount } from './discount.model';
+import { Popular } from './popular.model';
+import { Novelty } from './novelty.model';
 
 interface ItemCreationAttrs {
   name: string;
@@ -30,37 +31,41 @@ interface ItemCreationAttrs {
   colorId: number;
 }
 
-@Table({tableName: 'item'})
+@Table({ tableName: 'item' })
 export class Item extends Model<Item, ItemCreationAttrs> {
+  @Column({
+    type: DataType.INTEGER,
+    unique: true,
+    autoIncrement: true,
+    primaryKey: true,
+  })
+  id: number = 0;
 
-  @Column({type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true})
-  id: number;
-
-  @Column({type: DataType.STRING, allowNull: false})
+  @Column({ type: DataType.STRING, allowNull: false })
   name: string;
 
-  @Column({type: DataType.INTEGER, allowNull: false})
+  @Column({ type: DataType.INTEGER, allowNull: false })
   price: number;
 
-  @Column({type: DataType.STRING,  unique: true, allowNull: false})
+  @Column({ type: DataType.STRING, unique: true, allowNull: false })
   article: string;
 
-  @Column({type: DataType.INTEGER, allowNull: false})
+  @Column({ type: DataType.INTEGER, allowNull: false })
   length: number;
 
-  @Column({type: DataType.INTEGER, allowNull: false})
+  @Column({ type: DataType.INTEGER, allowNull: false })
   width: number;
 
-  @Column({type: DataType.INTEGER, allowNull: false})
+  @Column({ type: DataType.INTEGER, allowNull: false })
   height: number;
 
-  @Column({type: DataType.INTEGER, allowNull: false})
+  @Column({ type: DataType.INTEGER, allowNull: false })
   weight: number;
 
-  @Column({type: DataType.INTEGER, allowNull: false})
+  @Column({ type: DataType.INTEGER, allowNull: false })
   count: number;
 
-  @Column({type: DataType.BOOLEAN, allowNull: false})
+  @Column({ type: DataType.BOOLEAN, allowNull: false })
   visibility: boolean;
 
   @BelongsToMany(() => Tag, () => ItemTag)
@@ -80,11 +85,11 @@ export class Item extends Model<Item, ItemCreationAttrs> {
   basketItems: BasketItem[];
 
   @HasOne(() => Discount)
-  discount: Discount
+  discount: Discount;
 
   @HasOne(() => Popular)
-  popular: Discount
+  popular: Discount;
 
   @HasOne(() => Novelty)
-  novelty: Discount
+  novelty: Discount;
 }

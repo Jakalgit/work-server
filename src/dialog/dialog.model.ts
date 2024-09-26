@@ -1,6 +1,14 @@
-import {BelongsTo, Column, DataType, ForeignKey, HasMany, Model, Table} from "sequelize-typescript";
-import {User} from "../user/user.model";
-import {Message} from "./message.model";
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  HasMany,
+  Model,
+  Table,
+} from 'sequelize-typescript';
+import { User } from '../user/user.model';
+import { Message } from './message.model';
 
 interface DialogCreationAttrs {
   userToken: string;
@@ -8,16 +16,24 @@ interface DialogCreationAttrs {
   lastAdminCheck: string;
 }
 
-@Table({tableName: 'dialog'})
+@Table({ tableName: 'dialog' })
 export class Dialog extends Model<Dialog, DialogCreationAttrs> {
+  @Column({
+    type: DataType.INTEGER,
+    unique: true,
+    autoIncrement: true,
+    primaryKey: true,
+  })
+  id: number = 0;
 
-  @Column({type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true})
-  id: number;
-
-  @Column({type: DataType.STRING, allowNull: false})
+  @Column({ type: DataType.STRING, allowNull: false })
   name: string;
 
-  @Column({type: DataType.STRING, allowNull: false, defaultValue: Date.now().toString()})
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+    defaultValue: Date.now().toString(),
+  })
   lastAdminCheck: string;
 
   @BelongsTo(() => User)
@@ -29,5 +45,4 @@ export class Dialog extends Model<Dialog, DialogCreationAttrs> {
 
   @HasMany(() => Message)
   messages: Message[];
-
 }
