@@ -73,12 +73,12 @@ export class ItemController {
     return this.itemService.deleteFromPopular(id);
   }
 
-  @Get('/:id')
+  @Get('/one/:id')
   getOne(@Param('id') id: number) {
     return this.itemService.getOne(id);
   }
 
-  @Get('/all')
+  @Get('/all-items')
   getAll() {
     return this.itemService.getAll();
   }

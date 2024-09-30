@@ -4,12 +4,13 @@ import { BasketItemService } from './basket-item.service';
 import {SequelizeModule} from "@nestjs/sequelize";
 import {Item} from "../item/models/item.model";
 import {ItemModule} from "../item/item.module";
+import { BasketItem } from './basket-item.model';
 
 @Module({
   controllers: [BasketItemController],
   providers: [BasketItemService],
   imports: [
-    SequelizeModule.forFeature([Item, BasketItemService]),
+    SequelizeModule.forFeature([Item, BasketItem]),
     ItemModule,
   ]
 })

@@ -40,8 +40,8 @@ export class Dialog extends Model<Dialog, DialogCreationAttrs> {
   user: User;
 
   @ForeignKey(() => User)
-  @Column
-  userToken: string;
+  @Column({ type: DataType.INTEGER })
+  userId: number;
 
   @HasMany(() => Message)
   messages: Message[];

@@ -7,13 +7,12 @@ const start = async function() {
     const PORT = process.env.PORT || 5000
     const app = await NestFactory.create(AppModule)
 
+    app.setGlobalPrefix('api')
 
-    // app.enableCors(
-    //   {
-    //     origin: 'https://bookbytes-panel.vercel.app',
-    //     credentials: true,
-    //   }
-    // )
+    app.enableCors({
+      origin: [/^https:\/\/work-rc-panel-site\.vercel\.app(\/.*)?$/],
+      credentials: true,
+    });
 
     await app.listen(PORT, () => console.log(`Server started on port ${PORT}`))
   } catch (e) {

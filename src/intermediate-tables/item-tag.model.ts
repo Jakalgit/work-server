@@ -2,7 +2,7 @@ import {Column, ForeignKey, Model, Table} from "sequelize-typescript";
 import {Item} from "../item/models/item.model";
 import {Tag} from "../tag/tag.model";
 
-interface ItemTagCreationAttrs {
+export interface ItemTagCreationAttrs {
   itemId: number;
   tagId: number;
 }

@@ -22,7 +22,7 @@ export class FilesService {
     }
     try {
       const fileName = uuid.v4() + '.' + extname
-      const filePath = path.resolve(__dirname, '..', 'static', 'image')
+      const filePath = path.resolve(__dirname, '..', '..', 'static', 'image')
       if (!fs.existsSync(filePath)) {
         fs.mkdirSync(filePath, {recursive: true})
       }

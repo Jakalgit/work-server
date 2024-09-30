@@ -1,7 +1,7 @@
 import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
 import { OrderItem } from './order-item.model';
 
-interface OrderCreationAttrs {
+export interface OrderCreationAttrs {
   token: string;
   name: string;
   phone: string;

@@ -1,83 +1,119 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Item } from './models/item.model';
+import { Item, ItemCreationAttrs } from './models/item.model';
 import { CreateItemDto } from './dto/create-item.dto';
 import { ImageService } from '../image/image.service';
 import { ItemTag } from '../intermediate-tables/item-tag.model';
 import { Op } from 'sequelize';
 import { Tag } from '../tag/tag.model';
-import { Color } from '../color/color.model';
 import { ChangeItemDto } from './dto/change-item.dto';
 import { GetItemFilterDto } from './dto/get-item-filter.dto';
 import { Discount } from './models/discount.model';
 import { Novelty } from './models/novelty.model';
 import { Popular } from './models/popular.model';
+import { ItemInfo } from './models/info.model';
+import { Sequelize } from 'sequelize-typescript';
 
 @Injectable()
 export class ItemService {
   constructor(
     @InjectModel(Item) private itemRepository: typeof Item,
     @InjectModel(ItemTag) private itemTagRepository: typeof ItemTag,
+    @InjectModel(ItemInfo) private itemInfoRepository: typeof ItemInfo,
     @InjectModel(Tag) private tagRepository: typeof Tag,
-    @InjectModel(Color) private colorRepository: typeof Color,
     @InjectModel(Discount) private discountRepository: typeof Discount,
     @InjectModel(Novelty) private noveltyRepository: typeof Novelty,
     @InjectModel(Popular) private popularRepository: typeof Popular,
+    private readonly sequelize: Sequelize,
     private imageService: ImageService,
   ) {}
 
   async create(dto: CreateItemDto, imageFiles: any[]) {
-    const candidate = await this.itemRepository.findOne({
-      rejectOnEmpty: undefined,
-      where: { article: dto.article },
-    });
-    const tagIds: number[] = JSON.parse(dto.tagIds);
+    const transaction = await this.sequelize.transaction();
 
-    if (candidate) {
-      throw new HttpException(
-        'Товар с таким артиклем уже существует',
-        HttpStatus.NOT_FOUND,
-      );
-    }
+    try {
+      const tagIds: number[] = JSON.parse(dto.tagIds)
+      const infoBlocks: string[] = JSON.parse(dto.infos)
 
-    const dropDto = dto;
-    delete dropDto.tagIds;
-
-    const colorCandidate = await this.colorRepository.findByPk(dto.colorId);
-
-    if (!colorCandidate) {
-      throw new HttpException(
-        'Группы цветов с таким id не существует',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    const dtoItemTags = [];
-
-    if (tagIds.length !== 0) {
-      const tags_candidate = await this.tagRepository.findAll({
-        where: { id: { [Op.or]: tagIds } },
+      const candidate = await this.itemRepository.findOne({
+        rejectOnEmpty: undefined,
+        where: { article: dto.article },
+        raw: true,
+        transaction
       });
-      if (tags_candidate.length !== tagIds.length) {
+
+      // Check if there is an item with this article
+      if (candidate) {
         throw new HttpException(
-          'Один или несколько жанров не существует',
-          HttpStatus.NOT_FOUND,
+          'A product with this article already exists',
+          HttpStatus.BAD_REQUEST,
         );
       }
-      tagIds.forEach((id) => {
-        dtoItemTags.push({ tagId: id, itemId: item.id });
-      });
+
+      // Check length information blocks
+      if (infoBlocks.length < 1) {
+        throw new BadRequestException(
+          'The number of information blocks cannot be less than 1'
+        )
+      }
+
+      // Check if there is a zero infoblock
+      if (infoBlocks.find(el => el.length === 0)) {
+        throw new BadRequestException(
+          'Length in the information block cannot be zero'
+        )
+      }
+
+      const itemCreateDto: ItemCreationAttrs = {
+        name: dto.name,
+        price: dto.price,
+        article: dto.article,
+        count: dto.count,
+        visibility: dto.visibility,
+        availability: dto.availability
+      }
+
+      // Creating an item
+      const item = await this.itemRepository.create(itemCreateDto, {transaction});
+
+      let dtoItemTags = [];
+
+      // Checking the existence of the passed tags
+      if (tagIds.length !== 0) {
+        const tags_candidate = await this.tagRepository.findAll({
+          where: { id: { [Op.or]: tagIds } },
+          transaction
+        });
+        if (tags_candidate.length !== tagIds.length) {
+          throw new BadRequestException(
+            'One or more tags do not exist'
+          );
+        }
+        dtoItemTags = tagIds.map(id => ({ tagId: id, itemId: item.dataValues.id }))
+      }
+
+      // Creating images
+      await this.imageService.create(item.dataValues.id, imageFiles, transaction);
+
+      // Creating itemTags
+      if (dtoItemTags.length !== 0) {
+        await this.itemTagRepository.bulkCreate(dtoItemTags, {transaction});
+      }
+
+      // Creating information blocks for item
+      const itemInfosCreate = infoBlocks.map(el => ({text: el, itemId: item.dataValues.id}))
+      if (itemInfosCreate.length !== 0) {
+        await this.itemInfoRepository.bulkCreate(itemInfosCreate, {transaction})
+      }
+
+      // Commit transaction
+      await transaction.commit();
+
+      return item;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
     }
-
-    const item = await this.itemRepository.create(dropDto);
-
-    await this.imageService.create(item.id, imageFiles);
-
-    if (dtoItemTags.length !== 0) {
-      await this.itemTagRepository.bulkCreate(dtoItemTags);
-    }
-
-    return item;
   }
 
   async changeItem(dto: ChangeItemDto) {
@@ -87,15 +123,6 @@ export class ItemService {
     if (!item) {
       throw new HttpException(
         'Товара с таким id не существует',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    const colorCandidate = await this.colorRepository.findByPk(dto.colorId);
-
-    if (!colorCandidate) {
-      throw new HttpException(
-        'Группы цветов с таким id не существует',
         HttpStatus.NOT_FOUND,
       );
     }
@@ -147,12 +174,7 @@ export class ItemService {
     item.name = dto.name;
     item.price = dto.price;
     item.article = dto.article;
-    item.length = dto.length;
-    item.width = dto.width;
-    item.height = dto.height;
-    item.weight = dto.weight;
     item.count = dto.count;
-    item.colorId = dto.colorId;
     item.visibility = dto.visibility;
 
     await item.save();
@@ -171,7 +193,8 @@ export class ItemService {
   async getOne(id: number) {
     const item = await this.itemRepository.findOne({
       rejectOnEmpty: undefined,
-      where: { id, visibility: true },
+      where: { id },
+      raw: true,
     });
 
     if (!item) {
@@ -181,13 +204,23 @@ export class ItemService {
       );
     }
 
+    const itemTags = await this.itemTagRepository.findAll({ where: {itemId: id}, raw: true })
+    const tagIds = itemTags.map(el => el.tagId)
+    const tags = (await this.tagRepository.findAll({
+      where: {
+        id: {[Op.or]: tagIds}
+      },
+      raw: true,
+    })).map(el => ({...el, isChanged: false}))
+
+    const infoBlocks = await this.itemInfoRepository.findAll({ where: {itemId: id}, raw: true })
     const images = await this.imageService.getImagesByItemId(id);
 
-    return { ...item, images };
+    return { ...item, images, infoBlocks, tags };
   }
 
   async getAll() {
-    const items = await this.itemRepository.findAll();
+    const items = await this.itemRepository.findAll({raw: true});
     return await this.addPreviewToItems(items);
   }
 
@@ -397,8 +430,7 @@ export class ItemService {
   }
 
   private async addPreviewToItems(items: any[]) {
-    const itemIds: number[] = [];
-    items.forEach((item) => itemIds.push(item.id));
+    const itemIds: number[] = items.map(el => el.id)
     const images = await this.imageService.getPreviewsByItemIds(itemIds);
     for (let i = 0; i < items.length; i++) {
       const image = images.at(

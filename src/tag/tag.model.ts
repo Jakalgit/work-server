@@ -8,7 +8,7 @@ import {
 import { Item } from '../item/models/item.model';
 import { ItemTag } from '../intermediate-tables/item-tag.model';
 
-interface TagCreationAttrs {
+export interface TagCreationAttrs {
   name: string;
 }
 
@@ -22,7 +22,7 @@ export class Tag extends Model<Tag, TagCreationAttrs> {
   })
   id: number = 0;
 
-  @Column({ type: DataType.STRING, allowNull: false })
+  @Column({ type: DataType.STRING, allowNull: false, unique: true })
   name: string;
 
   @BelongsToMany(() => Item, () => ItemTag)

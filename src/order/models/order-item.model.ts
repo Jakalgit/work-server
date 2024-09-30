@@ -47,5 +47,6 @@ export class OrderItem extends Model<OrderItem, OrderItemCreationAttrs> {
   order: Order;
 
   @ForeignKey(() => Order)
+  @Column({ type: DataType.INTEGER })
   orderId: number;
 }

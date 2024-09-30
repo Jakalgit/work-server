@@ -1,5 +1,6 @@
 import {IsBoolean, IsNumber, IsString, Length, Min} from "class-validator";
 
+// FormData
 export class CreateItemDto {
 
   @IsString({message: 'name должно иметь тип string'})
@@ -13,32 +14,32 @@ export class CreateItemDto {
   @IsString({message: 'article должно иметь тип string'})
   article: string;
 
-  @IsNumber({}, {message: 'length должно иметь тип number'})
-  @Min(0)
-  length: number;
-
-  @IsNumber({}, {message: 'width должно иметь тип number'})
-  @Min(0)
-  width: number;
-
-  @IsNumber({}, {message: 'height должно иметь тип number'})
-  @Min(0)
-  height: number;
-
-  @IsNumber({}, {message: 'weight должно иметь тип number'})
-  @Min(0)
-  weight: number;
-
   @IsNumber({}, {message: 'count должно иметь тип number'})
   @Min(0)
   count: number;
 
-  @IsString({message: 'tags должно иметь тип string'})
+  @IsString({message: 'tagIds должно иметь тип string'})
   tagIds: string;
+
+  @IsString({message: 'infos должно иметь тип string'})
+  infos: string;
 
   @IsBoolean({message: 'visibility должно иметь тип boolean'})
   visibility: boolean;
 
-  @IsNumber({}, {message: 'colorId должно иметь тип number'})
-  colorId: number;
+  @IsBoolean({message: 'availability должно иметь тип boolean'})
+  availability: boolean;
+
+  @IsNumber({}, {message: 'oldPrice должно иметь тип number'})
+  @Min(0)
+  oldPrice: number;
+
+  @IsBoolean({message: 'isDiscount должно иметь тип boolean'})
+  isDiscount: boolean;
+
+  @IsBoolean({message: 'isPopular должно иметь тип boolean'})
+  isPopular: boolean;
+
+  @IsBoolean({message: 'isNovelty должно иметь тип boolean'})
+  isNovelty: boolean;
 }

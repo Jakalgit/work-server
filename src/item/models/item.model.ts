@@ -1,9 +1,7 @@
 import {
-  BelongsTo,
   BelongsToMany,
   Column,
   DataType,
-  ForeignKey,
   HasMany,
   HasOne,
   Model,
@@ -11,24 +9,20 @@ import {
 } from 'sequelize-typescript';
 import { Tag } from '../../tag/tag.model';
 import { ItemTag } from '../../intermediate-tables/item-tag.model';
-import { Color } from '../../color/color.model';
 import { Image } from '../../image/image.model';
 import { BasketItem } from '../../basket-item/basket-item.model';
 import { Discount } from './discount.model';
 import { Popular } from './popular.model';
 import { Novelty } from './novelty.model';
+import { ItemInfo } from './info.model';
 
-interface ItemCreationAttrs {
+export interface ItemCreationAttrs {
   name: string;
   price: number;
   article: string;
-  length: number;
-  width: number;
-  height: number;
-  weight: number;
   count: number;
   visibility: boolean;
-  colorId: number;
+  availability: boolean;
 }
 
 @Table({ tableName: 'item' })
@@ -51,38 +45,25 @@ export class Item extends Model<Item, ItemCreationAttrs> {
   article: string;
 
   @Column({ type: DataType.INTEGER, allowNull: false })
-  length: number;
-
-  @Column({ type: DataType.INTEGER, allowNull: false })
-  width: number;
-
-  @Column({ type: DataType.INTEGER, allowNull: false })
-  height: number;
-
-  @Column({ type: DataType.INTEGER, allowNull: false })
-  weight: number;
-
-  @Column({ type: DataType.INTEGER, allowNull: false })
   count: number;
 
   @Column({ type: DataType.BOOLEAN, allowNull: false })
   visibility: boolean;
 
+  @Column({ type: DataType.BOOLEAN, allowNull: false })
+  availability: boolean;
+
   @BelongsToMany(() => Tag, () => ItemTag)
   tags: Tag[];
-
-  @BelongsTo(() => Color)
-  color: Color;
-
-  @ForeignKey(() => Color)
-  @Column
-  colorId: number;
 
   @HasMany(() => Image)
   images: Image[];
 
   @HasMany(() => BasketItem)
   basketItems: BasketItem[];
+
+  @HasMany(() => ItemInfo)
+  itemInfos: ItemInfo[];
 
   @HasOne(() => Discount)
   discount: Discount;

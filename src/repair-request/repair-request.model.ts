@@ -23,7 +23,7 @@ export class RepairRequest extends Model<
   @Column({ type: DataType.STRING, allowNull: false })
   name: string;
 
-  @Column({ type: DataType.NUMBER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false })
   phone: number;
 
   @Column({ type: DataType.STRING, allowNull: false })
