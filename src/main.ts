@@ -9,12 +9,18 @@ const start = async function() {
 
     app.setGlobalPrefix('api')
 
+    /*
     app.enableCors({
       origin: [
         /^https:\/\/work-rc-panel-site\.vercel\.app(\/.*)?$/,
         process.env.REDIRECT_URL
       ],
       credentials: true,
+    });
+    */
+
+    app.enableCors({
+      origin: '*'
     });
 
     await app.listen(PORT, () => console.log(`Server started on port ${PORT}`))
