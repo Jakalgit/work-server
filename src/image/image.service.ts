@@ -58,7 +58,8 @@ export class ImageService {
       where: {
         itemId: {[Op.or]: itemIds},
         index: 0,
-      }
+      },
+      raw: true,
     })
   }
 }

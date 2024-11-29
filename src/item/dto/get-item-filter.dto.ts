@@ -1,4 +1,4 @@
-import {IsBoolean, IsNumber, IsString, Min} from "class-validator";
+import {IsNumber, IsString, Min} from "class-validator";
 
 export class GetItemFilterDto {
 
@@ -14,16 +14,7 @@ export class GetItemFilterDto {
   page: number;
 
   @IsString({message: "tagIds должно иметь тип string"})
-  tags: string;
-
-  @IsBoolean({message: 'popular должно иметь тип boolean'})
-  popular: boolean;
-
-  @IsBoolean({message: 'novelty должно иметь тип boolean'})
-  novelty: boolean;
-
-  @IsBoolean({message: 'discount должно иметь тип boolean'})
-  discount: boolean;
+  tagIds: string;
 
   name: string
 }

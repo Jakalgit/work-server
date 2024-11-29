@@ -225,9 +225,9 @@ export class ItemService {
   }
 
   async getAllByFilterPage(dto: GetItemFilterDto) {
-    const limit = 12;
+    const limit = 120;
     const offset = dto.page * limit - limit;
-    const tagIds = JSON.parse(dto.tags);
+    const tagIds = JSON.parse(dto.tagIds);
     let itemIds = [];
     let item_tags = [];
     if (tagIds.length !== 0) {
@@ -235,29 +235,13 @@ export class ItemService {
         where: { tagId: { [Op.or]: tagIds } },
       });
     }
+
     item_tags.forEach((el) => {
       if (itemIds.indexOf(el.itemId) === -1) {
         itemIds.push(el.itemId);
       }
     });
-    if (dto.discount) {
-      const discounts = await this.discountRepository.findAll({
-        where: { id: { [Op.or]: itemIds } },
-      });
-      itemIds = this.checkIdInArray(discounts, itemIds);
-    }
-    if (dto.popular) {
-      const populars = await this.popularRepository.findAll({
-        where: { id: { [Op.or]: itemIds } },
-      });
-      itemIds = this.checkIdInArray(populars, itemIds);
-    }
-    if (dto.novelty) {
-      const novelties = await this.noveltyRepository.findAll({
-        where: { id: { [Op.or]: itemIds } },
-      });
-      itemIds = this.checkIdInArray(novelties, itemIds);
-    }
+
     if (itemIds.length === 0 && tagIds.length !== 0) {
       return { count: 0, rows: [], pageCount: 0 };
     } else {
@@ -269,15 +253,22 @@ export class ItemService {
           visibility: true,
         },
       };
-      const all_items = await this.itemRepository.findAll(options);
-      const items_row = await this.itemRepository.findAndCountAll({
-        where: options.where,
+      const items = await this.itemRepository.findAndCountAll({
+        // where: options.where,
         limit,
         offset,
+        raw: true,
       });
-      items_row.rows = await this.addPreviewToItems(items_row.rows);
-      const count = Math.floor(all_items.length / limit);
-      return { ...items_row, pageCount: count !== 0 ? count : 1 };
+
+      // Общее количество записей
+      const totalRecords = items.count;
+
+      // Общее количество страниц
+      const totalPages = Math.ceil(totalRecords / 12);
+
+      items.rows = await this.addPreviewToItems(items.rows);
+
+      return { ...items, totalPages};
     }
   }
 
@@ -436,7 +427,7 @@ export class ItemService {
       const image = images.at(
         images.findIndex((el) => el.itemId === items[i].id),
       );
-      items[i] = { ...items[i], image };
+      items[i] = { ...items[i], filename: image.filename };
     }
     return items;
   }
