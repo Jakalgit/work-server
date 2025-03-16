@@ -14,16 +14,7 @@ export class GetItemFilterDto {
   page: number;
 
   @IsString({message: "tagIds должно иметь тип string"})
-  tags: string;
+  tagIds: string;
 
-  @IsBoolean({message: 'popular должно иметь тип boolean'})
-  popular: boolean;
-
-  @IsBoolean({message: 'novelty должно иметь тип boolean'})
-  novelty: boolean;
-
-  @IsBoolean({message: 'discount должно иметь тип boolean'})
-  discount: boolean;
-
-  name: string
+  finder: string;
 }

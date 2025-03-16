@@ -11,9 +11,6 @@ import { Tag } from '../../tag/tag.model';
 import { ItemTag } from '../../intermediate-tables/item-tag.model';
 import { Image } from '../../image/image.model';
 import { BasketItem } from '../../basket-item/basket-item.model';
-import { Discount } from './discount.model';
-import { Popular } from './popular.model';
-import { Novelty } from './novelty.model';
 import { ItemInfo } from './info.model';
 
 export interface ItemCreationAttrs {
@@ -47,10 +44,10 @@ export class Item extends Model<Item, ItemCreationAttrs> {
   @Column({ type: DataType.INTEGER, allowNull: false })
   count: number;
 
-  @Column({ type: DataType.BOOLEAN, allowNull: false })
+  @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
   visibility: boolean;
 
-  @Column({ type: DataType.BOOLEAN, allowNull: false })
+  @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
   availability: boolean;
 
   @BelongsToMany(() => Tag, () => ItemTag)
@@ -64,13 +61,4 @@ export class Item extends Model<Item, ItemCreationAttrs> {
 
   @HasMany(() => ItemInfo)
   itemInfos: ItemInfo[];
-
-  @HasOne(() => Discount)
-  discount: Discount;
-
-  @HasOne(() => Popular)
-  popular: Discount;
-
-  @HasOne(() => Novelty)
-  novelty: Discount;
 }

@@ -29,17 +29,4 @@ export class CreateItemDto {
 
   @IsBoolean({message: 'availability должно иметь тип boolean'})
   availability: boolean;
-
-  @IsNumber({}, {message: 'oldPrice должно иметь тип number'})
-  @Min(0)
-  oldPrice: number;
-
-  @IsBoolean({message: 'isDiscount должно иметь тип boolean'})
-  isDiscount: boolean;
-
-  @IsBoolean({message: 'isPopular должно иметь тип boolean'})
-  isPopular: boolean;
-
-  @IsBoolean({message: 'isNovelty должно иметь тип boolean'})
-  isNovelty: boolean;
 }

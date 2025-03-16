@@ -8,9 +8,6 @@ import { Op } from 'sequelize';
 import { Tag } from '../tag/tag.model';
 import { ChangeItemDto } from './dto/change-item.dto';
 import { GetItemFilterDto } from './dto/get-item-filter.dto';
-import { Discount } from './models/discount.model';
-import { Novelty } from './models/novelty.model';
-import { Popular } from './models/popular.model';
 import { ItemInfo } from './models/info.model';
 import { Sequelize } from 'sequelize-typescript';
 
@@ -21,9 +18,6 @@ export class ItemService {
     @InjectModel(ItemTag) private itemTagRepository: typeof ItemTag,
     @InjectModel(ItemInfo) private itemInfoRepository: typeof ItemInfo,
     @InjectModel(Tag) private tagRepository: typeof Tag,
-    @InjectModel(Discount) private discountRepository: typeof Discount,
-    @InjectModel(Novelty) private noveltyRepository: typeof Novelty,
-    @InjectModel(Popular) private popularRepository: typeof Popular,
     private readonly sequelize: Sequelize,
     private imageService: ImageService,
   ) {}
@@ -86,7 +80,7 @@ export class ItemService {
         });
         if (tags_candidate.length !== tagIds.length) {
           throw new BadRequestException(
-            'One or more tags do not exist'
+            'Одного или нескольких тегов не существует'
           );
         }
         dtoItemTags = tagIds.map(id => ({ tagId: id, itemId: item.dataValues.id }))
@@ -128,16 +122,16 @@ export class ItemService {
     }
 
     if (tagIds.length !== 0) {
-      const tags_candidate = await this.tagRepository.findAll({
+      const tagCandidates = await this.tagRepository.findAll({
         where: { id: { [Op.or]: tagIds } },
       });
-      if (tags_candidate.length !== tagIds.length) {
+      if (tagCandidates.length !== tagIds.length) {
         throw new HttpException(
-          'Один или несколько жанров не существует',
+          'Один или несколько тегов не существует',
           HttpStatus.NOT_FOUND,
         );
       }
-      const item_tag_list = await this.itemTagRepository.findAll({
+      const itemTagCandidates = await this.itemTagRepository.findAll({
         where: {
           itemId: dto.id,
         },
@@ -145,11 +139,11 @@ export class ItemService {
       const tagsForAdd = [];
       const itemTagIdsForDelete = [];
       tagIds.forEach((id) => {
-        if (!item_tag_list.find((el) => el.tagId === id)) {
+        if (!itemTagCandidates.find((el) => el.tagId === id)) {
           tagsForAdd.push({ tagId: id, itemId: dto.id });
         }
       });
-      item_tag_list.forEach((itemTag) => {
+      itemTagCandidates.forEach((itemTag) => {
         if (!tagIds.find((id) => id === itemTag.tagId)) {
           itemTagIdsForDelete.push(itemTag.tagId);
         }
@@ -227,57 +221,50 @@ export class ItemService {
   async getAllByFilterPage(dto: GetItemFilterDto) {
     const limit = 12;
     const offset = dto.page * limit - limit;
-    const tagIds = JSON.parse(dto.tags);
-    let itemIds = [];
-    let item_tags = [];
+    const tagIds = JSON.parse(dto.tagIds);
+    let itemTags = [];
     if (tagIds.length !== 0) {
-      item_tags = await this.itemTagRepository.findAll({
-        where: { tagId: { [Op.or]: tagIds } },
-      });
-    }
-    item_tags.forEach((el) => {
-      if (itemIds.indexOf(el.itemId) === -1) {
-        itemIds.push(el.itemId);
-      }
-    });
-    if (dto.discount) {
-      const discounts = await this.discountRepository.findAll({
-        where: { id: { [Op.or]: itemIds } },
-      });
-      itemIds = this.checkIdInArray(discounts, itemIds);
-    }
-    if (dto.popular) {
-      const populars = await this.popularRepository.findAll({
-        where: { id: { [Op.or]: itemIds } },
-      });
-      itemIds = this.checkIdInArray(populars, itemIds);
-    }
-    if (dto.novelty) {
-      const novelties = await this.noveltyRepository.findAll({
-        where: { id: { [Op.or]: itemIds } },
-      });
-      itemIds = this.checkIdInArray(novelties, itemIds);
-    }
-    if (itemIds.length === 0 && tagIds.length !== 0) {
-      return { count: 0, rows: [], pageCount: 0 };
-    } else {
-      const options = {
+      itemTags = await this.itemTagRepository.findAll({
         where: {
-          id: { [Op.or]: itemIds },
-          price: { [Op.gte]: dto.min_price, [Op.lte]: dto.max_price },
-          name: { [Op.iRegexp]: `${dto.name}` },
-          visibility: true,
-        },
+          tagId: {
+            [Op.or]: tagIds,
+          }
+        }
+      })
+    }
+    const itemIds: number[] = itemTags.map((el) => el.itemId);
+    let where: any = {
+      visibility: true,
+      name: { [Op.iRegexp]: `${dto.finder || ''}` },
+      price: {
+        [Op.gte]: dto.min_price,
+      }
+    }
+
+    if (dto.max_price > 0) {
+      where.price = {
+        ...where.price,
+        [Op.lte]: dto.max_price,
       };
-      const all_items = await this.itemRepository.findAll(options);
-      const items_row = await this.itemRepository.findAndCountAll({
-        where: options.where,
-        limit,
-        offset,
-      });
-      items_row.rows = await this.addPreviewToItems(items_row.rows);
-      const count = Math.floor(all_items.length / limit);
-      return { ...items_row, pageCount: count !== 0 ? count : 1 };
+    }
+
+    if (itemIds.length !== 0) {
+      where.id = { [Op.or]: itemIds };
+    }
+
+    const result = await this.itemRepository.findAndCountAll({
+      where,
+      raw: true,
+      limit,
+      offset,
+    });
+
+    result.rows = await this.addPreviewToItems(result.rows);
+    const totalPages = Math.ceil(result.count / limit);
+
+    return {
+      records: result.rows,
+      totalPages,
     }
   }
 
@@ -302,131 +289,6 @@ export class ItemService {
     });
 
     return this.addPreviewToItems(items);
-  }
-
-  async addDiscount(id: number, price: number) {
-    const item = await this.itemRepository.findOne({
-      rejectOnEmpty: undefined,
-      where: { id },
-    });
-
-    if (!item) {
-      throw new HttpException(
-        'Товара с таким id не существует',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    if (price >= item.price) {
-      throw new HttpException(
-        'Скидочная цена должна быть меньше основной',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    let discount = await this.discountRepository.findOne({
-      rejectOnEmpty: undefined,
-      where: { itemId: id },
-    });
-
-    if (discount) {
-      throw new HttpException(
-        'Скидка для этого товара уже существует',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    discount = await this.discountRepository.create({
-      itemId: id,
-      old_price: item.price,
-    });
-
-    item.price = price;
-    await item.save();
-
-    return discount;
-  }
-
-  async deleteDiscount(id: number) {
-    const discount = await this.discountRepository.findOne({
-      rejectOnEmpty: undefined,
-      where: { itemId: id },
-    });
-
-    if (!discount) {
-      throw new HttpException(
-        'Скидка для этого товара не найдена',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    await discount.destroy();
-
-    return discount;
-  }
-
-  async addToNovelty(id: number) {
-    const item = await this.itemRepository.findOne({
-      rejectOnEmpty: undefined,
-      where: { id },
-    });
-
-    if (!item) {
-      throw new HttpException(
-        'Товара с таким id не существует',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    return await this.noveltyRepository.create({ itemId: id });
-  }
-
-  async deleteFromNovelty(id: number) {
-    const item = await this.itemRepository.findOne({
-      rejectOnEmpty: undefined,
-      where: { id },
-    });
-
-    if (!item) {
-      throw new HttpException(
-        'Товара с таким id не существует',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    return await this.noveltyRepository.destroy({ where: { itemId: id } });
-  }
-
-  async addToPopular(id: number) {
-    const item = await this.itemRepository.findOne({
-      rejectOnEmpty: undefined,
-      where: { id },
-    });
-
-    if (!item) {
-      throw new HttpException(
-        'Товара с таким id не существует',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    return await this.popularRepository.create({ itemId: id });
-  }
-
-  async deleteFromPopular(id: number) {
-    const item = await this.itemRepository.findOne({
-      rejectOnEmpty: undefined,
-      where: { id },
-    });
-
-    if (!item) {
-      throw new HttpException(
-        'Товара с таким id не существует',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    return await this.popularRepository.destroy({ where: { itemId: id } });
   }
 
   private async addPreviewToItems(items: any[]) {

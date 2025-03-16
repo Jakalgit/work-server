@@ -23,9 +23,6 @@ import { OrderItem } from './order/models/order-item.model';
 import { RepairRequest } from './repair-request/repair-request.model';
 import { Dialog } from './dialog/dialog.model';
 import { BasketItem } from './basket-item/basket-item.model';
-import { Discount } from './item/models/discount.model';
-import { Popular } from './item/models/popular.model';
-import { Novelty } from './item/models/novelty.model';
 import { Message } from './dialog/message.model';
 import { ItemInfo } from './item/models/info.model';
 
@@ -57,9 +54,6 @@ import { ItemInfo } from './item/models/info.model';
         RepairRequest,
         Dialog,
         BasketItem,
-        Discount,
-        Popular,
-        Novelty,
         Message,
         ItemInfo,
       ],

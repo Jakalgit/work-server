@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Tag } from './tag.model';
 import { CreateTagDto } from './dto/create-tag.dto';
@@ -6,12 +6,31 @@ import { ChangeNameDto } from './dto/change-name.dto';
 import { ItemTag } from '../intermediate-tables/item-tag.model';
 import { ChangeTagsDto } from './dto/change-tags.dto';
 import { Op } from 'sequelize';
+import * as console from 'node:console';
 
 @Injectable()
-export class TagService {
+export class TagService implements OnModuleInit {
 
   constructor(@InjectModel(Tag) private tagRepository: typeof Tag,
               @InjectModel(ItemTag) private itemTagRepository: typeof ItemTag) {
+  }
+
+  async onModuleInit(): Promise<any> {
+    try {
+      await this.tagRepository.create({
+        name: 'Популярное'
+      });
+
+      await this.tagRepository.create({
+        name: 'Акции'
+      });
+
+      await this.tagRepository.create({
+        name: 'Новинки'
+      });
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async create(dto: CreateTagDto) {
